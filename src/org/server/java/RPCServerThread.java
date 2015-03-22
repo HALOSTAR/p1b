@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 public class RPCServerThread implements Runnable {
 	private Thread t;
@@ -33,7 +34,7 @@ public class RPCServerThread implements Runnable {
 				
 				case operationSESSIONREAD:
 					//SessionRead accepts all args and returns call results
-					outBuf = recvPkt.getData();
+					outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
 					break;
 				}
 				// here outBuf should contain the callID and results of the call

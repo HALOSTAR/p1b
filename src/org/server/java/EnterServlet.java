@@ -48,8 +48,11 @@ public class EnterServlet extends HttpServlet {
     }
     
     static {
-    	SessTblManageThread t = new SessTblManageThread();
-    	t.start();
+    	SessTblManageThread tSess = new SessTblManageThread();
+    	tSess.start();
+    	
+    	RPCServerThread tRPCServer = new RPCServerThread();
+    	tRPCServer.start();
     }
 
 	/**
