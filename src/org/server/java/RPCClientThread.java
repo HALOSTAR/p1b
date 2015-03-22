@@ -23,8 +23,7 @@ public class RPCClientThread implements Runnable {
 	
 	private static final int operationSESSIONREAD = RPCServerThread.operationSESSIONREAD;
 	private static final int operationSESSIONWRITE = RPCServerThread.operationSESSIONWRITE;
-	//private static final int portProj1bRPC = RPCServerThread.portProj1bRPC;
-	private static final int portProj1bRPC = 5300;
+	private static final int portProj1bRPC = RPCServerThread.portProj1bRPC;
 	private static final int maxPacketSize = RPCServerThread.maxPacketSize;
 	
 	/**
