@@ -1,6 +1,10 @@
 package org.server.java;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 
 public class RPCServerThread implements Runnable {
@@ -17,8 +21,29 @@ public class RPCServerThread implements Runnable {
 		try {
 			DatagramSocket rpcSocket = new DatagramSocket(portProj1bRPC);
 			while(true) {
+				byte[] inBuf = new byte[maxPacketSize];
+				DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+				rpcSocket.receive(recvPkt);
+				InetAddress returnAddr = recvPkt.getAddress();
+				int returnPort = recvPkt.getPort();
+				// here inBuf contains the callID and operationCode
+				byte[] outBuf = null;
+				
+				switch(getOperationCode(inBuf)) {
+				
+				case operationSESSIONREAD:
+					//SessionRead accepts all args and returns call results
+					outBuf = recvPkt.getData();
+					break;
+				}
+				// here outBuf should contain the callID and results of the call
+				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, returnAddr, returnPort);
+				rpcSocket.send(sendPkt);
 			}
 		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -29,5 +54,11 @@ public class RPCServerThread implements Runnable {
 			t = new Thread (this, threadName);
 			t.start();
 		}
+	}
+	
+	private int getOperationCode(byte[] _inBuf) throws UnsupportedEncodingException {
+		String inString = new String(_inBuf, "UTF-8");
+		String[] inDetailsString = inString.split(",");
+		return Integer.parseInt(inDetailsString[0]);
 	}
 }
