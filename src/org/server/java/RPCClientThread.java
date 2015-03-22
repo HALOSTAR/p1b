@@ -27,6 +27,10 @@ public class RPCClientThread implements Runnable {
 	private static final int portProj1bRPC = 5300;
 	private static final int maxPacketSize = RPCServerThread.maxPacketSize;
 	
+	/**
+	 * Constructor: for test
+	 * @param _sessID: session ID
+	 */
 	public RPCClientThread(String _sessID) {
 		sessID = _sessID;
 		operationCode = operationSESSIONREAD;
@@ -39,12 +43,27 @@ public class RPCClientThread implements Runnable {
 		}
 	}
 	
+	/**
+	 * constructor: for operationSESSIONREAD
+	 * @param _sessID: session ID
+	 * @param _operationCode: operationSESSIONREAD
+	 * @param _destAddrs: destination address list
+	 */
 	public RPCClientThread(String _sessID, int _operationCode, LinkedList<InetAddress> _destAddrs) {
 		sessID = _sessID;
 		operationCode = _operationCode;
 		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
 	}
 	
+	/**
+	 * constructor: for operationSESSIONREAD
+	 * @param _sessID: session ID
+	 * @param _newVersion: new version number
+	 * @param _newData: new data
+	 * @param _discardTime: discard time
+	 * @param _operationCode: operationSESSIONWRITE
+	 * @param _destAddrs: destination address list
+	 */
 	public RPCClientThread(String _sessID, int _newVersion, String _newData, String _discardTime,
 			int _operationCode, LinkedList<InetAddress> _destAddrs) {
 		sessID = _sessID;
