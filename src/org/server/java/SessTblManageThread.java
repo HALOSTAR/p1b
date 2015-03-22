@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class SessTblManageThread implements Runnable {
 	private Thread t;
-	private String threadName = "CookieMapThread";
+	private String threadName = "SessTblManageThread";
 	
 	@Override
 	public void run() {

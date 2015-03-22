@@ -8,7 +8,7 @@ import javax.servlet.http.Cookie;
 public class SessCookieManage {
 	
 	public static final String COOKIE_NAME = "CS5300PROJ1SESSION";
-	public static final int MAX_AGE = 60 * 2;
+	public static final int SESSION_TIMEOUT_SECS = 60 * 2;
 	
 	/** creat a new cookie
 	 * sessionID = <session number, server ID>;
@@ -30,7 +30,7 @@ public class SessCookieManage {
 		String cookieValue = sessID + "_" + version + "_" + metadata;
 		
 		Cookie cookie = new Cookie(COOKIE_NAME, cookieValue);
-		cookie.setMaxAge(MAX_AGE);
+		cookie.setMaxAge(SESSION_TIMEOUT_SECS);
 		return cookie;
 	}
 	

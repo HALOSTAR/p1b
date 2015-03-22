@@ -27,7 +27,7 @@ public class EnterServlet extends HttpServlet {
 	public static final String ORG_MSG = "Hello New User!";  //original message
 	
 	public static final String COOKIE_NAME = SessCookieManage.COOKIE_NAME;  //cookie name
-	public static final int MAX_AGE = SessCookieManage.MAX_AGE;
+	public static final int SESSION_TIMEOUT_SECS = SessCookieManage.SESSION_TIMEOUT_SECS;
 	public static int sess_num = 0;  //the valid session number start from 1
 	public static String svrIDLocal;  //local server ID, initialized at "void init(ServletConfig config)"
 	
@@ -93,7 +93,7 @@ public class EnterServlet extends HttpServlet {
 						isNew = false;  //this is NOT a new client
 						sessCookie = cookie;
 						SessCookieManage.setVersion(sessCookie, SessCookieManage.getVersion(sessCookie) + 1);
-						sessCookie.setMaxAge(MAX_AGE);
+						sessCookie.setMaxAge(SESSION_TIMEOUT_SECS);
 						response.addCookie(sessCookie);
 						
 						String sessDetails[] = sessData.split("_");
@@ -140,7 +140,6 @@ public class EnterServlet extends HttpServlet {
 		request.setAttribute("curCookieInfo", cookieInfo);
 		request.setAttribute("curSessionExpiration", sessExpiration);
 		request.setAttribute("isLogout", isLogout);
-		
         RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
         dispatcher.forward(request, response);
 	}
@@ -173,7 +172,7 @@ public class EnterServlet extends HttpServlet {
 				//button: refresh
 				if (btnParam.equals("buttonRefresh")) {
 					SessCookieManage.setVersion(sessCookie, SessCookieManage.getVersion(sessCookie) + 1);
-					sessCookie.setMaxAge(MAX_AGE);
+					sessCookie.setMaxAge(SESSION_TIMEOUT_SECS);
 					response.addCookie(sessCookie);
 					
 					//get SessTbl information
@@ -197,7 +196,7 @@ public class EnterServlet extends HttpServlet {
 				//button: buttonReplace
 				else if(btnParam.equals("buttonReplace")) {
 					SessCookieManage.setVersion(sessCookie, SessCookieManage.getVersion(sessCookie) + 1);
-					sessCookie.setMaxAge(MAX_AGE);
+					sessCookie.setMaxAge(SESSION_TIMEOUT_SECS);
 					response.addCookie(sessCookie);
 					
 					//set SessTbl information: message
@@ -230,7 +229,6 @@ public class EnterServlet extends HttpServlet {
 			request.setAttribute("curCookieInfo", cookieInfo);
 			request.setAttribute("curSessionExpiration", sessExpiration);
 			request.setAttribute("isLogout", isLogout);
-			
 	        RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
 	        dispatcher.forward(request, response);
 		}
