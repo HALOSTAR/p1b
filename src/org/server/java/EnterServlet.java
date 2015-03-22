@@ -152,6 +152,12 @@ public class EnterServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String hdnParam = request.getParameter("pagename");
+		
+		//////////////////////
+		RPCClientThread tRPCClient = new RPCClientThread("abc");
+		tRPCClient.start();
+		
+
 		if (hdnParam.equals("response")) {
 			Cookie[] cookies = request.getCookies();
 			Cookie sessCookie = null;  //cookie needed to pass to client
