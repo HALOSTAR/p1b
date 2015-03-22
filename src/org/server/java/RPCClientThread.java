@@ -44,9 +44,9 @@ public class RPCClientThread implements Runnable {
 	@Override
 	public void run() {
 		if (operationSESSIONREAD == operationCode) {
-			SessionReadClient(sessID);
+			SessionRead(sessID);
 		}else if(operationSESSIONWRITE == operationCode) {
-			SessionWriteClient(sessID, newVersion, newData, discardTime);
+			SessionWrite(sessID, newVersion, newData, discardTime);
 		}
 	}
 	
@@ -57,7 +57,7 @@ public class RPCClientThread implements Runnable {
 		}
 	}
 	
-	private DatagramPacket SessionReadClient(String _sessID) {
+	private DatagramPacket SessionRead(String _sessID) {
 		DatagramSocket rpcSocket;
 		DatagramPacket recvPkt;
 		try {
@@ -96,7 +96,7 @@ public class RPCClientThread implements Runnable {
 		return null;
 	}
 	
-	private DatagramPacket SessionWriteClient(String _sessID, int _newVersion, String _newData, String _discardTime) {
+	private DatagramPacket SessionWrite(String _sessID, int _newVersion, String _newData, String _discardTime) {
 		DatagramSocket rpcSocket;
 		DatagramPacket recvPkt;
 		try {

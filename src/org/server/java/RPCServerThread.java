@@ -12,8 +12,11 @@ public class RPCServerThread implements Runnable {
 	private Thread t;
 	private String threadName = "RPCServerThread";
 	
+	//operation code
 	public static final int operationSESSIONREAD = 1;
 	public static final int operationSESSIONWRITE = 2;
+	
+	//server property
 	public static final int portProj1bRPC = 5300;
 	public static final int maxPacketSize = 512;
 	
