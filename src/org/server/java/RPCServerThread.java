@@ -13,29 +13,31 @@ public class RPCServerThread implements Runnable {
 	private String threadName = "RPCServerThread";
 	
 	//operation code
-	public static final int operationSESSIONREAD = 1;
-	public static final int operationSESSIONWRITE = 2;
+	public static final int OPERATION_SESSIONREAD = 1;
+	public static final int OPERATION_SESSIONWRITE = 2;
 	
 	//server property
-	public static final int portProj1bRPC = 5300;
-	public static final int maxPacketSize = 512;
+	public static final int PORT_PROJ1_RPC = 5300;
+	public static final int MAX_PACKET_SIZE = 512;
 	
 	@Override
 	public void run() {
 		try {
-			DatagramSocket rpcSocket = new DatagramSocket(portProj1bRPC);
+			DatagramSocket rpcSocket = new DatagramSocket(PORT_PROJ1_RPC);
 			while(true) {
-				byte[] inBuf = new byte[maxPacketSize];
+				// receive DatagramPacket and fill inBuf
+				// inBuf will contains callID and operationCode
+				byte[] inBuf = new byte[MAX_PACKET_SIZE];
 				DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 				rpcSocket.receive(recvPkt);
 				InetAddress returnAddr = recvPkt.getAddress();
 				int returnPort = recvPkt.getPort();
-				// here inBuf contains the callID and operationCode
+				
+				//fill outBuf
 				byte[] outBuf = null;
-				
+				System.out.println("fill outBuf");
 				switch(getOperationCode(inBuf)) {
-				
-				case operationSESSIONREAD:
+				case OPERATION_SESSIONREAD:
 					//SessionRead accepts all args and returns call results
 					outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
 					break;
@@ -45,24 +47,24 @@ public class RPCServerThread implements Runnable {
 				rpcSocket.send(sendPkt);
 			}
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	public void start() {
 		if (t == null) {
-			t = new Thread (this, threadName);
+			t = new Thread (this, threadName);  //instantiate a Thread object
 			t.start();
 		}
 	}
 	
+	//get operation code
 	private int getOperationCode(byte[] _inBuf) throws UnsupportedEncodingException {
+		System.out.println("decode");
 		String inString = new String(_inBuf, "UTF-8");
 		String[] inDetailsString = inString.split(",");
-		return Integer.parseInt(inDetailsString[0]);
+		return Integer.parseInt(inDetailsString[1]);
 	}
 }

@@ -8,7 +8,7 @@ import javax.servlet.http.Cookie;
 public class SessCookieManage {
 	
 	public static final String COOKIE_NAME = "CS5300PROJ1SESSION";
-	public static final int SESSION_TIMEOUT_SECS = 60 * 2;
+	public static final int SESSION_TIMEOUT_SECS = 60 * 5;
 	
 	/** creat a new cookie
 	 * sessionID = <session number, server ID>;
