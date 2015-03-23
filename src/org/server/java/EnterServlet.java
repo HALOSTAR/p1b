@@ -48,7 +48,7 @@ public class EnterServlet extends HttpServlet {
     }
     
     static {
-    	SessTblManageThread tSess = new SessTblManageThread();
+    	SessTblGarbageThread tSess = new SessTblGarbageThread();
     	tSess.start();
     	
     	RPCServerThread tRPCServer = new RPCServerThread();
@@ -59,7 +59,7 @@ public class EnterServlet extends HttpServlet {
 	 * @see Servlet#init(ServletConfig)
 	 */
 	public void init(ServletConfig config) throws ServletException {
-		//get loacl server ID
+		//get loacl server IDs
 		URL url;
 		BufferedReader br;
 		try {

@@ -8,6 +8,21 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 
+/**
+ * RPC server thread, receive call message and reply confirm to client
+ * Operate for operation code
+ * One RPCServerThread per server, initialized when the server runs. 
+ * 
+ * A call message consist of: 
+ * 		a unique callID for the call
+ * 		an operation code
+ * 		zero or more arguments, whose format is determined by the operation code
+ * A reply message could consist of:
+ * 		the callID of the call to which this is a reply
+ * 		zero or more results, whose format is determined by the operation code
+ * @author jingyi
+ *
+ */
 public class RPCServerThread implements Runnable {
 	private Thread t;
 	private String threadName = "RPCServerThread";

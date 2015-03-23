@@ -9,6 +9,18 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 
+/**
+ * RPC client thread, send call message and receive confirm from server
+ * A call message consist of: 
+ * 		a unique callID for the call
+ * 		an operation code
+ * 		zero or more arguments, whose format is determined by the operation code
+ * A reply message could consist of:
+ * 		the callID of the call to which this is a reply
+ * 		zero or more results, whose format is determined by the operation code
+ * @author jingyi
+ *
+ */
 public class RPCClientThread implements Runnable {
 	private Thread t;
 	private String threadName = "RPCClientThread";
