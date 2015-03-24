@@ -92,7 +92,8 @@ public class EnterServlet extends HttpServlet {
 					if (null == sessData) {
 						isNew = true;  //this is a new client (without session ID)
 						break;
-					}else {
+					}
+					else {
 						isNew = false;  //this is NOT a new client
 						sessCookie = cookie;
 						SessCookieManage.setVersion(sessCookie, SessCookieManage.getVersion(sessCookie) + 1);
@@ -154,8 +155,7 @@ public class EnterServlet extends HttpServlet {
 		String hdnParam = request.getParameter("pagename");
 
 		//******************************************************************//
-		RPCClientThread tRPCClient = new RPCClientThread("abc");
-		tRPCClient.start();
+		RPCClient tRPCClient = new RPCClient("abc");
 		
 
 		if (hdnParam.equals("response")) {
@@ -185,6 +185,7 @@ public class EnterServlet extends HttpServlet {
 					response.addCookie(sessCookie);
 					
 					//get SessTbl information
+					//lastSessionData
 					String lastSessionData; 
 					lastSessionData = SessTbl.get(SessCookieManage.getSessionID(sessCookie)); 
 					String sessionDetails[] = lastSessionData.split("_");

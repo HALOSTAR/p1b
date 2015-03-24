@@ -21,9 +21,7 @@ import java.util.LinkedList;
  * @author jingyi
  *
  */
-public class RPCClientThread implements Runnable {
-	private Thread t;
-	private String threadName = "RPCClientThread";
+public class RPCClient{
 	private static int callID = 0;  //increase 1 by every call
 	private String sessID;
 	private int newVersion;
@@ -45,29 +43,84 @@ public class RPCClientThread implements Runnable {
 	 * Constructor: for test
 	 * @param _sessID: session ID
 	 */
-	public RPCClientThread(String _sessID) {
+	public RPCClient() {
+		destAddrs = new LinkedList<InetAddress>();
+
+	}
+	
+	public static int getCallID() {
+		return callID;
+	}
+
+	public static void setCallID(int callID) {
+		RPCClient.callID = callID;
+	}
+
+	public String getSessID() {
+		return sessID;
+	}
+
+	public void setSessID(String sessID) {
+		this.sessID = sessID;
+	}
+
+	public int getNewVersion() {
+		return newVersion;
+	}
+
+	public void setNewVersion(int newVersion) {
+		this.newVersion = newVersion;
+	}
+
+	public String getNewData() {
+		return newData;
+	}
+
+	public void setNewData(String newData) {
+		this.newData = newData;
+	}
+
+	public String getDiscardTime() {
+		return discardTime;
+	}
+
+	public void setDiscardTime(String discardTime) {
+		this.discardTime = discardTime;
+	}
+
+	public LinkedList<InetAddress> getDestAddrs() {
+		return destAddrs;
+	}
+
+	public void setDestAddrs(LinkedList<InetAddress> destAddrs) {
+		this.destAddrs = destAddrs;
+	}
+
+	public int getOperationCode() {
+		return operationCode;
+	}
+
+	public void setOperationCode(int operationCode) {
+		this.operationCode = operationCode;
+	}
+
+	/**
+	 * Constructor: for test
+	 * @param _sessID: session ID
+	 */
+	public RPCClient(String _sessID) {
 		sessID = _sessID;
 		operationCode = OPERATION_SESSIONREAD;
 		destAddrs = new LinkedList<InetAddress>();
+		
 		try {
+			// 127.0.0.1 is just for test purpose
 			destAddrs.add(InetAddress.getByName("127.0.0.1"));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	/**
-	 * constructor: for operationSESSIONREAD
-	 * @param _sessID: session ID
-	 * @param _operationCode: operationSESSIONREAD
-	 * @param _destAddrs: destination address list
-	 */
-	public RPCClientThread(String _sessID, int _operationCode, LinkedList<InetAddress> _destAddrs) {
-		sessID = _sessID;
-		operationCode = _operationCode;
-		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
-	}
-	
+
 	/**
 	 * constructor: for operationSESSIONREAD
 	 * @param _sessID: session ID
@@ -77,7 +130,8 @@ public class RPCClientThread implements Runnable {
 	 * @param _operationCode: operationSESSIONWRITE
 	 * @param _destAddrs: destination address list
 	 */
-	public RPCClientThread(String _sessID, int _newVersion, String _newData, String _discardTime,
+	@SuppressWarnings("unchecked")
+	public RPCClient(String _sessID, int _newVersion, String _newData, String _discardTime,
 			int _operationCode, LinkedList<InetAddress> _destAddrs) {
 		sessID = _sessID;
 		newVersion = _newVersion;
@@ -87,21 +141,6 @@ public class RPCClientThread implements Runnable {
 		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
 	}
 	
-	@Override
-	public void run() {
-		if (OPERATION_SESSIONREAD == operationCode) {
-			SessionRead(sessID);
-		}else if(OPERATION_SESSIONWRITE == operationCode) {
-			SessionWrite(sessID, newVersion, newData, discardTime);
-		}
-	}
-	
-	public void start() {
-		if (t == null) {
-			t = new Thread (this, threadName);  //instantiate a Thread object
-			t.start();
-		}
-	}
 	
 	/**
 	 * operate SessionRead
@@ -154,7 +193,7 @@ public class RPCClientThread implements Runnable {
 	}
 	
 	/**
-	 * operate session write
+	 * operate session write, hail other 
 	 * @param _sessID: session ID
 	 * @param _newVersion: new version
 	 * @param _newData: new data
