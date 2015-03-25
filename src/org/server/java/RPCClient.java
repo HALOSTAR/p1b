@@ -39,6 +39,9 @@ public class RPCClient{
 	private static final int PORT_PROJ1_RPC = RPCServerThread.PORT_PROJ1_RPC;
 	private static final int MAX_PACKET_SIZE = RPCServerThread.MAX_PACKET_SIZE;
 	
+	//client property
+	private static final int SOCKET_TIMEOUT_MILLSEC = 500;
+	
 	/**
 	 * Constructor: for test
 	 * @param _sessID: session ID
@@ -141,6 +144,14 @@ public class RPCClient{
 		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
 	}
 	
+	/**
+	 * get information for SessionRead
+	 * @param _destAddrs
+	 */
+	public void setReadInfo(LinkedList<InetAddress> _destAddrs) {
+		destAddrs.clear();
+		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
+	}
 	
 	/**
 	 * operate SessionRead
@@ -150,13 +161,15 @@ public class RPCClient{
 	public DatagramPacket SessionRead(String _sessID) {
 		DatagramSocket rpcSocket;
 		DatagramPacket recvPkt;
+		
 		try {
 			rpcSocket = new DatagramSocket();
+			rpcSocket.setSoTimeout(SOCKET_TIMEOUT_MILLSEC);
 			
 			//callID plus 1 for every call
 			callID += 1;
 			
-			//fill outBuf with callID, operation code and session ID
+			//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + _sessID
 			byte[] outBuf;
 			String outString = callID + "," + OPERATION_SESSIONREAD + "," + _sessID;
 			outBuf = outString.getBytes(); 
@@ -167,7 +180,8 @@ public class RPCClient{
 				rpcSocket.send(sendPkt);
 			}
 			
-			//receive DatagramPacket and fill inBuf
+			// receive DatagramPacket and fill inBuf
+			// byte[] inBuf = callID + "," + OPERATION_SESSIONREAD + "," + _sessID
 			byte[] inBuf = new byte[MAX_PACKET_SIZE];
 			String inString;
 			int recCallID;
@@ -184,12 +198,21 @@ public class RPCClient{
 			
 		} catch (SocketException e) {
 			e.printStackTrace();
-		} catch (SocketTimeoutException stoe) {
+		} catch (SocketTimeoutException stoe) {  //time out exception
 			recvPkt = null;
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 * get information for SessionWrite
+	 * @param _destAddrs
+	 */
+	public void setWriteInfo(LinkedList<InetAddress> _destAddrs) {
+		destAddrs.clear();
+		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
 	}
 	
 	/**
@@ -203,8 +226,10 @@ public class RPCClient{
 	public DatagramPacket SessionWrite(String _sessID, int _newVersion, String _newData, String _discardTime) {
 		DatagramSocket rpcSocket;
 		DatagramPacket recvPkt;
+		
 		try {
 			rpcSocket = new DatagramSocket();
+			rpcSocket.setSoTimeout(SOCKET_TIMEOUT_MILLSEC);
 			
 			//callID plus 1 for every call
 			callID += 1;
@@ -238,7 +263,7 @@ public class RPCClient{
 			
 		} catch (SocketException e) {
 			e.printStackTrace();
-		} catch (SocketTimeoutException stoe) {
+		} catch (SocketTimeoutException stoe) {  //time out exception
 			recvPkt = null;
 		} catch (IOException ioe) {
 			ioe.printStackTrace();

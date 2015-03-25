@@ -12,11 +12,10 @@ public class SessCookieManage {
 	
 	/** creat a new cookie
 	 * sessionID = <session number, server ID>;
-	 * version number = 0;
-	 * location metadata = "NewMetadata"
+	 * version number = 0;  //version number will plus 1 for every request
+	 * sessionID_version_svrIDPrimary_svrIDBackup, sessionID = session number_sererID
 	 * MaxAge = 60 * 5;  //5 minutes
 	 * we use "_" to connect the tuples here. 
-	 * we can also use  URLDecoder.decode / URLEncoder.encode
 	 * @throws IOException 
 	 */
 	public static Cookie createCookie() throws IOException {
@@ -24,10 +23,9 @@ public class SessCookieManage {
 		String svrID = EnterServlet.svrIDLocal;
 		String sessID = EnterServlet.sess_num + "_" + svrID;
 		String version = "" + 0;
-		String svrIDPrimary = svrID;
-		String svrIDBackup = "svrIDBackup";
-		String metadata = svrIDPrimary + "_" + svrIDBackup;
-		String cookieValue = sessID + "_" + version + "_" + metadata;
+		String svrIDPrimary = EnterServlet.svrIDLocal;
+		String svrIDBackup = EnterServlet.svrIDBackupTest;
+		String cookieValue = sessID + "_" + version + "_" + svrIDPrimary + "_" + svrIDBackup;
 		
 		Cookie cookie = new Cookie(COOKIE_NAME, cookieValue);
 		cookie.setMaxAge(SESSION_TIMEOUT_SECS);
@@ -43,8 +41,7 @@ public class SessCookieManage {
 	/** Get version number from Cookie _cookie */
 	public static int getVersion(Cookie _cookie) throws UnsupportedEncodingException {
 		String valueDetails[] = _cookie.getValue().split("_");
-		int versionNum = Integer.parseInt(valueDetails[2]);
-		return versionNum;
+		return Integer.parseInt(valueDetails[2]);
 	}
 
 	/** Set version number to Cookie _cookie */
@@ -55,9 +52,31 @@ public class SessCookieManage {
 		_cookie.setValue(newCookieValue);
 	}
 	
-	/** Get metadata from Cookie _cookie */
-	public static String getMetadata(Cookie _cookie) {
+	/** Get primary server ID from Cookie _cookie */
+	public static String getServerIDPrimary(Cookie _cookie) {
 		String valueDetails[] = _cookie.getValue().split("_");
-		return valueDetails[3] + "_" + valueDetails[4];
+		return valueDetails[3];
+	}
+	
+	/** Set primary server ID to Cookie _cookie */
+	public static void setServerIDPrimary(Cookie _cookie, String _svrIDPrimary) {
+		String valueDetails[] = _cookie.getValue().split("_");
+		String newCookieValue = valueDetails[0] + "_" + valueDetails[1] + "_" 
+				+ valueDetails[2] + "_" + _svrIDPrimary + "_" + valueDetails[4];
+		_cookie.setValue(newCookieValue);
+	}
+	
+	/** Get backup server ID from Cookie _cookie */
+	public static String getServerIDBackup(Cookie _cookie) {
+		String valueDetails[] = _cookie.getValue().split("_");
+		return valueDetails[4];
+	}
+	
+	/** Set backup server ID to Cookie _cookie */
+	public static void setServerIDBackup(Cookie _cookie, String _svrIDBackup) {
+		String valueDetails[] = _cookie.getValue().split("_");
+		String newCookieValue = valueDetails[0] + "_" + valueDetails[1] + "_" 
+				+ valueDetails[2] + "_" + valueDetails[3] + "_" + _svrIDBackup;
+		_cookie.setValue(newCookieValue);
 	}
 }

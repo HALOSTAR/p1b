@@ -7,6 +7,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * RPC server thread, receive call message and reply confirm to client
@@ -44,43 +46,44 @@ public class RPCServerThread implements Runnable {
 		try {
 			@SuppressWarnings("resource")
 			DatagramSocket rpcSocket = new DatagramSocket(PORT_PROJ1_RPC);
-			RPCClient client = new RPCClient();
 			
 			while(true) {
 				// receive DatagramPacket and fill inBuf
-				// inBuf will contains callID and operationCode
+				// byte[] inBuf = callID + "," + OPERATION_SESSIONREAD + "," + sessID
 				byte[] inBuf = new byte[MAX_PACKET_SIZE];
 				DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 				rpcSocket.receive(recvPkt);
 				InetAddress returnAddr = recvPkt.getAddress();
 				int returnPort = recvPkt.getPort();
 				
-				//fill outBuf
 				byte[] outBuf = null;
-				System.out.println("fill outBuf");
 				switch(getOperationCode(inBuf)) {
 				case OPERATION_SESSIONREAD:{
-					//SessionRead accepts all args and returns call results
-					client.setOperationCode(OPERATION_SESSIONREAD);
-					
-					client.SessionRead(getSessionId(inBuf));
-					
-					
+					// SessionRead: look up whether session ID is in sessTbl
+					System.out.println("OPERATION_SESSIONREAD");
+					if (null != EnterServlet.SessTbl.get(getSessionId(inBuf))) {
+						//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + sessID
+						outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
+					}
+					break;
+				}
+				case OPERATION_SESSIONWRITE:{
+					// SessionWrite: write to the session table
+					System.out.println("OPERATION_SESSIONWRITE");
+					//byte[] outBuf = callID + "," + OPERATION_SESSIONWRITE + "," + 
+					//			sessID + "," + newVersion + "," + newData + "," + discardTime
+					updateSessTbl(inBuf);
 					outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
 					break;
-					
+				}
 				}
 				
-				case OPERATION_SESSIONWRITE:{
-					//SessionWrite starts writing to the session table
-						
-					}
-				
+				if (null != outBuf){
+					// here outBuf should contain the callID and results of the call
+					System.out.println("server outBuf: " + outBuf.toString());
+					DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, returnAddr, returnPort);
+					rpcSocket.send(sendPkt);
 				}
-				
-				// here outBuf should contain the callID and results of the call
-				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, returnAddr, returnPort);
-				rpcSocket.send(sendPkt);
 			}
 		} catch (SocketException e) {
 			e.printStackTrace();
@@ -96,19 +99,40 @@ public class RPCServerThread implements Runnable {
 		}
 	}
 	
-	//get operation code
-	private int getOperationCode(byte[] _inBuf) throws UnsupportedEncodingException {
-		System.out.println("decode");
-		String inString = new String(_inBuf, "UTF-8");
-		String[] inDetailsString = inString.split(",");
-		return Integer.parseInt(inDetailsString[1]);
+	//get callID
+	private int getCallID(byte[] _buf) throws UnsupportedEncodingException {
+		String bufString = new String(_buf, "UTF-8");
+		String[] inDetailsString = bufString.split(",");
+		return Integer.parseInt(inDetailsString[0]);
 	}
 	
 	//get operation code
-	private String getSessionId(byte[] _inBuf) throws UnsupportedEncodingException {
-		System.out.println("decode");
-		String inString = new String(_inBuf, "UTF-8");
-		String[] inDetailsString = inString.split(",");
-		return inDetailsString[2];
+	private int getOperationCode(byte[] _buf) throws UnsupportedEncodingException {
+		String bufString = new String(_buf, "UTF-8");
+		String[] bufDetails = bufString.split(",");
+		//test
+		System.out.println("operation code: " + bufDetails[1]);
+		return Integer.parseInt(bufDetails[1]);
+	}
+	
+	//get session ID
+	private String getSessionId(byte[] _buf) throws UnsupportedEncodingException {
+		String bufString = new String(_buf, "UTF-8");
+		String[] bufDetails = bufString.split(",");
+		return bufDetails[2].trim();
+	}
+	
+	/**
+	 * update the SessTbl with data in the _buf
+	 * @param _buf
+	 * @throws UnsupportedEncodingException
+	 */
+	public void updateSessTbl(byte[] _buf) throws UnsupportedEncodingException {
+		String bufString = new String(_buf, "UTF-8");
+		String[] bufDetails = bufString.split(",");
+		String sessID = bufDetails[2].trim();
+		String sessData = bufDetails[3].trim() + "_" + bufDetails[4].trim() + "_" + bufDetails[5].trim();
+		EnterServlet.SessTbl.put(sessID, sessData);
+		System.out.println(EnterServlet.SessTbl.get(sessID));
 	}
 }
