@@ -15,13 +15,13 @@ out.print(((String)request.getAttribute("msg")).toString());
 </h1>
 <hr/>
 
-<%
-if (false == ((Boolean)request.getAttribute("isLogout")).booleanValue()) {
-%>
-
 <form name = "response" action = "EnterServlet" method = "post">
 <input type = "hidden" name = "pagename" value = "response"/>
 <table cellpadding = "5" cellspacing = "5">
+<%	
+	String hiddenStr = ((String)request.getAttribute("msg")).toString();
+%>
+<input type = "hidden" name = "oldmsg" value = "<%=hiddenStr%>"/>
 <tr>
 	<td><button type = "submit" name = "button" value = "buttonReplace">Replace</button></td>
 	<td><input type = "text" name = "txtReplace"/></td>
@@ -37,18 +37,14 @@ if (false == ((Boolean)request.getAttribute("isLogout")).booleanValue()) {
 
 <p>
 <%
-out.println("Session Expiration Time: " + ((String)request.getAttribute("curSessionExpiration")).toString());
+out.println("Session Expiration Time: " + ((String)request.getAttribute("sessExpiration")).toString());
 %>
 </p>
 <p> 
 <%
-out.println(((String)request.getAttribute("curCookieInfo")).toString());
+out.println(((String)request.getAttribute("cookieInfo")).toString());
 %>
 </p>
-
-<%
-}
-%>
 
 </body>
 </html>
