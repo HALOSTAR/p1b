@@ -59,6 +59,7 @@ public class RPCServerThread implements Runnable {
 				byte[] outBuf = null;
 				switch(getOperationCode(inBuf)) {
 				case OPERATION_SESSIONREAD:{
+					
 					// SessionRead: look up whether session ID is in sessTbl
 					System.out.println("OPERATION_SESSIONREAD");
 					if (null != EnterServlet.SessTbl.get(getSessionId(inBuf))) {
@@ -68,6 +69,7 @@ public class RPCServerThread implements Runnable {
 					break;
 				}
 				case OPERATION_SESSIONWRITE:{
+					
 					// SessionWrite: write to the session table
 					System.out.println("OPERATION_SESSIONWRITE");
 					//byte[] outBuf = callID + "," + OPERATION_SESSIONWRITE + "," + 
@@ -80,7 +82,6 @@ public class RPCServerThread implements Runnable {
 				
 				if (null != outBuf){
 					// here outBuf should contain the callID and results of the call
-					System.out.println("server outBuf: " + outBuf.toString());
 					DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, returnAddr, returnPort);
 					rpcSocket.send(sendPkt);
 				}
@@ -99,7 +100,7 @@ public class RPCServerThread implements Runnable {
 		}
 	}
 	
-	//get callID
+	// @ TODO get callID  
 	private int getCallID(byte[] _buf) throws UnsupportedEncodingException {
 		String bufString = new String(_buf, "UTF-8");
 		String[] inDetailsString = bufString.split(",");
@@ -110,8 +111,6 @@ public class RPCServerThread implements Runnable {
 	private int getOperationCode(byte[] _buf) throws UnsupportedEncodingException {
 		String bufString = new String(_buf, "UTF-8");
 		String[] bufDetails = bufString.split(",");
-		//test
-		System.out.println("operation code: " + bufDetails[1]);
 		return Integer.parseInt(bufDetails[1]);
 	}
 	

@@ -35,7 +35,8 @@ public class SessCookieManage {
 	/** Get session ID from Cookie _cookie */
 	public static String getSessionID(Cookie _cookie) throws UnsupportedEncodingException {
 		String valueDetails[] = _cookie.getValue().split("_");
-		return valueDetails[0] + "_" + valueDetails[1];
+		String sessionID = valueDetails[0] + "_" + valueDetails[1];
+		return sessionID;
 	}
 
 	/** Get version number from Cookie _cookie */

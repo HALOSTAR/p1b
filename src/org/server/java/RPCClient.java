@@ -123,26 +123,6 @@ public class RPCClient{
 			e.printStackTrace();
 		}
 	}
-
-	/**
-	 * constructor: for operationSESSIONREAD
-	 * @param _sessID: session ID
-	 * @param _newVersion: new version number
-	 * @param _newData: new data
-	 * @param _discardTime: discard time
-	 * @param _operationCode: operationSESSIONWRITE
-	 * @param _destAddrs: destination address list
-	 */
-	@SuppressWarnings("unchecked")
-	public RPCClient(String _sessID, int _newVersion, String _newData, String _discardTime,
-			int _operationCode, LinkedList<InetAddress> _destAddrs) {
-		sessID = _sessID;
-		newVersion = _newVersion;
-		newData = _newData;
-		discardTime = _discardTime;
-		operationCode = _operationCode;
-		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
-	}
 	
 	/**
 	 * get information for SessionRead
@@ -192,7 +172,7 @@ public class RPCClient{
 				inString = new String(inBuf, "UTF-8");
 				String[] inDetailsString = inString.split(",");
 				recCallID = Integer.parseInt(inDetailsString[0]);  //get callID
-			}while (callID != recCallID);
+			}while (callID != recCallID); // check if the sent callid is back  
 			rpcSocket.close();
 			return recvPkt;
 			
