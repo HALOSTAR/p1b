@@ -101,44 +101,45 @@ public class EnterServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Cookie[] cookies = request.getCookies();
 		Cookie sessCookie = null;  //cookie needed to pass to client
-		
-		boolean isTimeout = true;  
+		boolean isNewClient = true;  // true if this is a new client, 
+									//cookie name is not "CS5300PROJ1SESSION"
 		LinkedList<InetAddress> sendAddrs = new LinkedList<InetAddress>();
 
 		//whether one of the cookie has the name "CS5300PROJ1SESSION"
 		if (cookies != null) {
 			for (Cookie cookie: cookies) {
 				if (COOKIE_NAME.equals(cookie.getName())) {
-					isTimeout = false;
+					isNewClient = false;
 					sessCookie = cookie;
 				}
 			}
 		}
 
-		// whether this is a valid session in local or remote server
-		if (!isTimeout) {
-			if(!retrieveSession(sessCookie, sendAddrs)){  // CANNOT retrieve session
-				isTimeout = true;
-			}else {  // successfully retrieve session
+		// !isNewClient: this is NOT a NEW client
+		if (!isNewClient) {
+			
+			// retrieveSession: sessionID is in (local or remote) SessTbl
+			if(retrieveSession(sessCookie, sendAddrs)){
 				msg = request.getParameter("oldmsg");
 				storeSession(false, sessCookie, msg, sendAddrs);  //update an old session
 				response.addCookie(sessCookie);  // pass the cookie to browser
-			}
-		}else {  // this is NOT a valid session
+				cookieInfo = sessCookie.getValue();  //change attribute "cookieInfo" value 
+			}//if(retrieveSession(sessCookie, sendAddrs))
+		}//if (!isNewClient)
+
+		
+		else {  // this is a NEW client
+			
 			// create a new cookie
 			sessCookie = SessCookieManage.createCookie(); 
 			
 			// update SessTbl
 			msg = ORG_MSG;
 			storeSession(true, sessCookie, msg, sendAddrs);  //create a new session
-			isTimeout = false;
 			response.addCookie(sessCookie);
-		}
+			cookieInfo = sessCookie.getValue();  //change attribute "cookieInfo" value 
+		}//else
 
-		// set attribute value
-		if (!isTimeout) {
-			cookieInfo = sessCookie.getValue();
-		}
 		//set attribute which needed to send to the client
 		request.setAttribute("msg", msg);
 		request.setAttribute("cookieInfo", cookieInfo);
@@ -153,64 +154,62 @@ public class EnterServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Cookie[] cookies = request.getCookies();
 		Cookie sessCookie = null;  //cookie needed to pass to client
-		boolean isTimeout = true;  // true if session is valid
+		boolean isNewClient = true;  // true if this is a new client, 
+									//cookie name is not "CS5300PROJ1SESSION"
 		LinkedList<InetAddress> sendAddrs = new LinkedList<InetAddress>();
 
 		//whether one of the cookie has the name "CS5300PROJ1SESSION"
 		if (cookies != null) {
 			for (Cookie cookie: cookies) {
 				if (COOKIE_NAME.equals(cookie.getName())) {
-					isTimeout = false;
+					isNewClient = false;
 					sessCookie = cookie;
 				}
 			}
 		}
 
-		// this is a valid session in local or remote server
-		if (!isTimeout) {
-			if(!retrieveSession(sessCookie, sendAddrs)){  // CANNOT retrieve session
-				isTimeout = true;
-			}else {  // successfully retrieve session
-				
+		// !isNewClient: this is NOT a NEW client
+		if (!isNewClient) {
+			
+			// retrieveSession: sessionID is in (local or remote) SessTbl
+			if(retrieveSession(sessCookie, sendAddrs)){
 				String btnParam = request.getParameter("button");
 				//button: refresh
 				if (btnParam.equals("buttonRefresh")) {
 					msg = request.getParameter("oldmsg");
 					storeSession(false, sessCookie, msg, sendAddrs);  //update an old session
 					response.addCookie(sessCookie);  // pass the cookie to browser
+					cookieInfo = sessCookie.getValue();  //change attribute "cookieInfo" value 
 				}
 				//button: buttonReplace
 				else if(btnParam.equals("buttonReplace")) {
 					msg = request.getParameter("txtReplace");
 					storeSession(false, sessCookie, msg, sendAddrs);  //update an old session
 					response.addCookie(sessCookie);  // pass the cookie to browser
+					cookieInfo = sessCookie.getValue();  //change attribute "cookieInfo" value 
 				}
 				//button: buttonLogout
 				else if(btnParam.equals("buttonLogout")) {
 					SessTbl.remove(SessCookieManage.getSessionID(sessCookie));
 					sessCookie.setMaxAge(0);
-					isTimeout = true;  // session time out
+					setTimeoutInfo();  //change attribute "msg", "cookieInfo", "sessExpiration" value 
 					response.addCookie(sessCookie);
 				}
-			}
+			}//if(retrieveSession(sessCookie, sendAddrs))
+		}//if (!isNewClient)
+		
+		else {  // this is a NEW client
 			
-		}else {  // this is NOT a valid session
 			// create a new cookie
 			sessCookie = SessCookieManage.createCookie(); 
 			
 			// update SessTbl
 			msg = ORG_MSG;
 			storeSession(true, sessCookie, msg, sendAddrs);
-			isTimeout = false;  //create a new session
 			response.addCookie(sessCookie);
-		}
+			cookieInfo = sessCookie.getValue();  //change attribute "cookieInfo" value 
+		}//else
 		
-		// set attribute value
-		if (!isTimeout) {
-			cookieInfo = sessCookie.getValue();
-		}else {
-			setTimeoutInfo();
-		}
 		//add attribute to request
 		request.setAttribute("msg", msg);
 		request.setAttribute("cookieInfo", cookieInfo);
@@ -244,8 +243,8 @@ public class EnterServlet extends HttpServlet {
 				|| SessCookieManage.getServerIDBackup(_cookie).equals("testtest")) {
 
 			try {
-				System.out.println("retrieve test(key): " + SessCookieManage.getSessionID(_cookie));
-				System.out.println("retrieve test(value): " + SessTbl.get(SessCookieManage.getSessionID(_cookie)));
+				//System.out.println("retrieve test(key): " + SessCookieManage.getSessionID(_cookie));
+				//System.out.println("retrieve test(value): " + SessTbl.get(SessCookieManage.getSessionID(_cookie)));
 				
 				if (null != SessTbl.get(SessCookieManage.getSessionID(_cookie))) {
 					return true;
@@ -274,7 +273,6 @@ public class EnterServlet extends HttpServlet {
 			return false;
 			
 		}else {  // NEITHER SvrIDPrimary NOR SvrIDBackup is the receiving server's own SvrID
-			System.out.println("RPC");
 
 			// Retrieving Session State on other server
 			try {
@@ -347,8 +345,8 @@ public class EnterServlet extends HttpServlet {
 					+ "_" + sessExpiration;
 			SessTbl.put(SessCookieManage.getSessionID(_cookie), sessData);
 			
-			System.out.println("store test(key): " + SessCookieManage.getSessionID(_cookie));
-			System.out.println("store test(value): " + SessTbl.get(SessCookieManage.getSessionID(_cookie)));
+			//System.out.println("store test(key): " + SessCookieManage.getSessionID(_cookie));
+			//System.out.println("store test(value): " + SessTbl.get(SessCookieManage.getSessionID(_cookie)));
 
 			// Storing Session State on backup server
 			_sendAddrs.clear();

@@ -75,11 +75,12 @@ public class RPCServerThread implements Runnable {
 					String sessData = EnterServlet.SessTbl.get(getSessionId(inBuf));
 					if (null != sessData) {
 						String[] sessDetails = sessData.split("_");
+						//************************* Change outBuf, add value in SessTbl************************//
 						String outString = getCallID(inBuf) + "," + OPERATION_SESSIONREAD + "," + getSessionId(inBuf) 
 								+ "," + sessDetails[0] + "," + sessDetails[1] + "," + sessDetails[2];
 						//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + 
 						//			sessID + "," + oldVersion + "," + oldData + "," + discardTime
-						System.out.println("OPERATION_SESSIONREAD outBuf content: " + outString);
+						System.out.println("(server)OPERATION_SESSIONREAD outBuf content: " + outString);
 						outBuf = outString.getBytes();
 					}
 					break;
@@ -91,7 +92,7 @@ public class RPCServerThread implements Runnable {
 					//			sessID + "," + newVersion + "," + newData + "," + discardTime
 					updateSessTbl(inBuf);
 					String inString = new String(inBuf, "UTF-8");
-					System.out.println("OPERATION_SESSIONREAD outBuf content: " + inString);
+					System.out.println("(server)OPERATION_SESSIONWRITE outBuf content: " + inString);
 					outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
 					break;
 				}
