@@ -60,21 +60,38 @@ public class RPCServerThread implements Runnable {
 				switch(getOperationCode(inBuf)) {
 				case OPERATION_SESSIONREAD:{
 					
+					//************************* Change Code in 9.43am 26th. March************************//
+					/* old version
 					// SessionRead: look up whether session ID is in sessTbl
 					System.out.println("OPERATION_SESSIONREAD");
 					if (null != EnterServlet.SessTbl.get(getSessionId(inBuf))) {
 						//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + sessID
 						outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
 					}
+					break; */
+					
+					// SessionRead: look up whether session ID is in sessTbl
+					// sessData: version number + "_" + msg + "_" + sessExpiration;
+					String sessData = EnterServlet.SessTbl.get(getSessionId(inBuf));
+					if (null != sessData) {
+						String[] sessDetails = sessData.split("_");
+						String outString = getCallID(inBuf) + "," + OPERATION_SESSIONREAD + "," + getSessionId(inBuf) 
+								+ "," + sessDetails[0] + "," + sessDetails[1] + "," + sessDetails[2];
+						//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + 
+						//			sessID + "," + oldVersion + "," + oldData + "," + discardTime
+						System.out.println("OPERATION_SESSIONREAD outBuf content: " + outString);
+						outBuf = outString.getBytes();
+					}
 					break;
 				}
 				case OPERATION_SESSIONWRITE:{
 					
 					// SessionWrite: write to the session table
-					System.out.println("OPERATION_SESSIONWRITE");
 					//byte[] outBuf = callID + "," + OPERATION_SESSIONWRITE + "," + 
 					//			sessID + "," + newVersion + "," + newData + "," + discardTime
 					updateSessTbl(inBuf);
+					String inString = new String(inBuf, "UTF-8");
+					System.out.println("OPERATION_SESSIONREAD outBuf content: " + inString);
 					outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
 					break;
 				}
@@ -132,6 +149,5 @@ public class RPCServerThread implements Runnable {
 		String sessID = bufDetails[2].trim();
 		String sessData = bufDetails[3].trim() + "_" + bufDetails[4].trim() + "_" + bufDetails[5].trim();
 		EnterServlet.SessTbl.put(sessID, sessData);
-		System.out.println(EnterServlet.SessTbl.get(sessID));
 	}
 }
