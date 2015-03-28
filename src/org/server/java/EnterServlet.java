@@ -47,10 +47,6 @@ public class EnterServlet extends HttpServlet {
 	public static String svrIDBackup;
 	//public static String svrIDBackupTest;  //mock server ID, initialized as 127.0.0.2
 
-	//information which needed to deliver to the client
-	//public static String cookieInfo = "";  //all information of a cookie
-	//public static String sessExpiration = "";  //session expiration-timestamp
-
 	// Client 
 	public static RPCClient rpcClient = new RPCClient();
 	
