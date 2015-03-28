@@ -8,7 +8,8 @@ import javax.servlet.http.Cookie;
 public class SessCookieManage {
 	
 	public static final String COOKIE_NAME = "CS5300PROJ1SESSION";
-	public static final int SESSION_TIMEOUT_SECS = 60 * 5;
+	public static final int SESSION_TIMEOUT_SECS = 60 * 1;
+	public static final int SESSION_TIMEOUT_DELTA_SECS = 5;
 	
 	/** creat a new cookie
 	 * sessionID = <session number, server ID>;
@@ -24,7 +25,7 @@ public class SessCookieManage {
 		String sessID = EnterServlet.sess_num + "_" + svrID;
 		String version = "" + 0;
 		String svrIDPrimary = EnterServlet.svrIDLocal;
-		String svrIDBackup = EnterServlet.svrIDBackupTest;
+		String svrIDBackup = RPCClient.SVRID_NULL;
 		String cookieValue = sessID + "_" + version + "_" + svrIDPrimary + "_" + svrIDBackup;
 		
 		Cookie cookie = new Cookie(COOKIE_NAME, cookieValue);
@@ -75,6 +76,8 @@ public class SessCookieManage {
 	
 	/** Set backup server ID to Cookie _cookie */
 	public static void setServerIDBackup(Cookie _cookie, String _svrIDBackup) {
+		//@hans
+		//if (_cookie==null || _svrIDBackup==null) return;
 		String valueDetails[] = _cookie.getValue().split("_");
 		String newCookieValue = valueDetails[0] + "_" + valueDetails[1] + "_" 
 				+ valueDetails[2] + "_" + valueDetails[3] + "_" + _svrIDBackup;

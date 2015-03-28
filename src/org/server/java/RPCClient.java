@@ -1,6 +1,7 @@
 package org.server.java;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -22,6 +23,8 @@ import java.util.LinkedList;
  *
  */
 public class RPCClient{
+	
+	public static final String SVRID_NULL= "SVRIDNULL"; 
 	private static int callID = 0;  //increase 1 by every call
 	private String sessID;
 	private int newVersion;
@@ -34,10 +37,6 @@ public class RPCClient{
 	//operation code
 	private static final int OPERATION_SESSIONREAD = RPCServerThread.OPERATION_SESSIONREAD;  //1
 	private static final int OPERATION_SESSIONWRITE = RPCServerThread.OPERATION_SESSIONWRITE;  //2
-
-	//server property
-	private static final int PORT_PROJ1_RPC = RPCServerThread.PORT_PROJ1_RPC;
-	private static final int MAX_PACKET_SIZE = RPCServerThread.MAX_PACKET_SIZE;
 	
 	//client property
 	private static final int SOCKET_TIMEOUT_MILLSEC = 500;
@@ -106,31 +105,26 @@ public class RPCClient{
 	public void setOperationCode(int operationCode) {
 		this.operationCode = operationCode;
 	}
-
+	
 	/**
-	 * Constructor: for test
-	 * @param _sessID: session ID
+	 * Clear LinkedList<InetAddress> destAddrs
 	 */
-	public RPCClient(String _sessID) {
-		sessID = _sessID;
-		operationCode = OPERATION_SESSIONREAD;
-		destAddrs = new LinkedList<InetAddress>();
-		
-		try {
-			// 127.0.0.1 is just for test purpose
-			destAddrs.add(InetAddress.getByName("127.0.0.1"));
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+	public void clearDestAddrs() {
+		this.destAddrs.clear();
 	}
 	
 	/**
-	 * get information for SessionRead
-	 * @param _destAddrs
+	 * Add _addr to LinkedList<InetAddress> destAddrs
+	 * @param _addr
 	 */
-	public void setReadInfo(LinkedList<InetAddress> _destAddrs) {
-		destAddrs.clear();
-		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
+	public void addDestAddr(String _addr) {
+		if (! _addr.equals(SVRID_NULL)) {
+			try {
+				this.destAddrs.add(InetAddress.getByName(_addr));
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/**
@@ -142,27 +136,30 @@ public class RPCClient{
 		DatagramSocket rpcSocket;
 		DatagramPacket recvPkt;
 		
+		// @hans
+		//String curDestAddr=null;
+		
 		try {
 			rpcSocket = new DatagramSocket();
 			rpcSocket.setSoTimeout(SOCKET_TIMEOUT_MILLSEC);
 			
-			//callID plus 1 for every call
-			callID += 1;
-			
 			//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + _sessID
-			byte[] outBuf;
+			callID += 1;  //callID plus 1 for every call
 			String outString = callID + "," + OPERATION_SESSIONREAD + "," + _sessID;
-			outBuf = outString.getBytes(); 
+			byte[] outBuf = outString.getBytes(); 
 			
 			//send to destination addresses
 			for(InetAddress destAddr: destAddrs) {
-				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, destAddr, PORT_PROJ1_RPC);
+				
+				//@hans
+				//curDestAddr = destAddr.toString();
+				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, destAddr, RPCServerThread.PORT_PROJ1_RPC);
 				rpcSocket.send(sendPkt);
 			}
 			
 			// receive DatagramPacket and fill inBuf
-			// byte[] inBuf = callID + "," + OPERATION_SESSIONREAD + "," + _sessID
-			byte[] inBuf = new byte[MAX_PACKET_SIZE];
+			// byte[] inBuf = callID + "," + foundVersion + "," + foundData
+			byte[] inBuf = new byte[RPCServerThread.MAX_PACKET_SIZE];
 			String inString;
 			int recCallID;
 			recvPkt = new DatagramPacket(inBuf, inBuf.length);
@@ -179,20 +176,15 @@ public class RPCClient{
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (SocketTimeoutException stoe) {  //time out exception
+			
+			//@hans
+			//ViewServerThread inst = new ViewServerThread();
+			//inst.setServerDown(curDestAddr);
 			recvPkt = null;
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
 		return null;
-	}
-	
-	/**
-	 * get information for SessionWrite
-	 * @param _destAddrs
-	 */
-	public void setWriteInfo(LinkedList<InetAddress> _destAddrs) {
-		destAddrs.clear();
-		destAddrs = (LinkedList<InetAddress>) _destAddrs.clone();
 	}
 	
 	/**
@@ -214,20 +206,21 @@ public class RPCClient{
 			//callID plus 1 for every call
 			callID += 1;
 			
-			//fill outBuf with callID, operation code, session ID, version number, data and discard time
-			byte[] outBuf;
+			//byte[] outBuf =  callID + "," + OPERATION_SESSIONWRITE + "," + _sessID + "," 
+			//				+ _newVersion + "," + _newData + "," + _discardTime
 			String outString = callID + "," + OPERATION_SESSIONWRITE + "," + _sessID + "," 
 					+ _newVersion + "," + _newData + "," + _discardTime;
-			outBuf = outString.getBytes(); 
+			byte[] outBuf = outString.getBytes(); 
 			
 			//send to destination addresses
 			for(InetAddress destAddr: destAddrs) {
-				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, destAddr, PORT_PROJ1_RPC); 
+				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, destAddr, RPCServerThread.PORT_PROJ1_RPC); 
 				rpcSocket.send(sendPkt);
 			}
 			
 			//receive DatagramPacket and fill inBuf
-			byte[] inBuf = new byte[MAX_PACKET_SIZE];
+			//byte[] inBuf = callID + "," + "OK"
+			byte[] inBuf = new byte[RPCServerThread.MAX_PACKET_SIZE];
 			String inString;
 			int recCallID;
 			recvPkt = new DatagramPacket(inBuf, inBuf.length);
@@ -249,5 +242,19 @@ public class RPCClient{
 			ioe.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 * get session value from recvPkt of SessionRead 
+	 * @param _recvPkt: byte[] inBuf = callID + "," + foundVersion + "," + foundData
+	 * @return: session value: version + "_" + msg
+	 * @throws UnsupportedEncodingException 
+	 */
+	public static String getSessValueFromRecvPkt(DatagramPacket _recvPkt) throws UnsupportedEncodingException {
+		byte[] buf = _recvPkt.getData();
+		//bufString = callID + "," + foundVersion + "," + foundData
+		String bufString = new String(buf, "UTF-8");
+		String[] bufDetails = bufString.split(",");
+		return bufDetails[1] + "_" + bufDetails[2];
 	}
 }

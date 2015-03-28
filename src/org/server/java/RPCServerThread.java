@@ -49,7 +49,6 @@ public class RPCServerThread implements Runnable {
 			
 			while(true) {
 				// receive DatagramPacket and fill inBuf
-				// byte[] inBuf = callID + "," + OPERATION_SESSIONREAD + "," + sessID
 				byte[] inBuf = new byte[MAX_PACKET_SIZE];
 				DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 				rpcSocket.receive(recvPkt);
@@ -60,27 +59,17 @@ public class RPCServerThread implements Runnable {
 				switch(getOperationCode(inBuf)) {
 				case OPERATION_SESSIONREAD:{
 					
-					//************************* Change Code in 9.43am 26th. March************************//
-					/* old version
 					// SessionRead: look up whether session ID is in sessTbl
-					System.out.println("OPERATION_SESSIONREAD");
-					if (null != EnterServlet.SessTbl.get(getSessionId(inBuf))) {
-						//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + sessID
-						outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
-					}
-					break; */
-					
-					// SessionRead: look up whether session ID is in sessTbl
-					// sessData: version number + "_" + msg + "_" + sessExpiration;
+					// sessData: version + "_" + msg + "_" + descardTime;
 					String sessData = EnterServlet.SessTbl.get(getSessionId(inBuf));
+					
 					if (null != sessData) {
 						String[] sessDetails = sessData.split("_");
-						//************************* Change outBuf, add value in SessTbl************************//
-						String outString = getCallID(inBuf) + "," + OPERATION_SESSIONREAD + "," + getSessionId(inBuf) 
-								+ "," + sessDetails[0] + "," + sessDetails[1] + "," + sessDetails[2];
-						//byte[] outBuf = callID + "," + OPERATION_SESSIONREAD + "," + 
-						//			sessID + "," + oldVersion + "," + oldData + "," + discardTime
-						System.out.println("(server)OPERATION_SESSIONREAD outBuf content: " + outString);
+						
+						//byte[] inBuf = callID + "," + OPERATION_SESSIONREAD + "," + sessID
+						//byte[] outBuf = callID + "," + foundVersion + "," + foundData
+						String outString = getCallID(inBuf) + "," + sessDetails[0] + "," + sessDetails[1];
+						//System.out.println("(server)OPERATION_SESSIONREAD outBuf content: " + outString);
 						outBuf = outString.getBytes();
 					}
 					break;
@@ -88,12 +77,13 @@ public class RPCServerThread implements Runnable {
 				case OPERATION_SESSIONWRITE:{
 					
 					// SessionWrite: write to the session table
-					//byte[] outBuf = callID + "," + OPERATION_SESSIONWRITE + "," + 
-					//			sessID + "," + newVersion + "," + newData + "," + discardTime
+					//byte[] inBuf = callID + "," + OPERATION_SESSIONWRITE + "," + _sessID + "," 
+					//				+ _newVersion + "," + _newData + "," + _discardTime
+					//byte[] outBuf = callID + "," + "OK"
 					updateSessTbl(inBuf);
-					String inString = new String(inBuf, "UTF-8");
-					System.out.println("(server)OPERATION_SESSIONWRITE outBuf content: " + inString);
-					outBuf = Arrays.copyOf(recvPkt.getData(), recvPkt.getLength());
+					String outString = getCallID(inBuf) + "," + "OK";
+					//System.out.println("(server)OPERATION_SESSIONWRITE outBuf content: " + outString);
+					outBuf = outString.getBytes();
 					break;
 				}
 				}
@@ -118,7 +108,7 @@ public class RPCServerThread implements Runnable {
 		}
 	}
 	
-	// @ TODO get callID  
+	// get callID  
 	private int getCallID(byte[] _buf) throws UnsupportedEncodingException {
 		String bufString = new String(_buf, "UTF-8");
 		String[] inDetailsString = bufString.split(",");
@@ -141,7 +131,8 @@ public class RPCServerThread implements Runnable {
 	
 	/**
 	 * update the SessTbl with data in the _buf
-	 * @param _buf
+	 * @param _buf: callID + "," + OPERATION_SESSIONWRITE + "," + _sessID + "," 
+	 * 				+ _newVersion + "," + _newData + "," + _discardTime
 	 * @throws UnsupportedEncodingException
 	 */
 	public void updateSessTbl(byte[] _buf) throws UnsupportedEncodingException {

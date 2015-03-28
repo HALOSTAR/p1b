@@ -10,7 +10,7 @@
 <body>
 <h1>
 <%
-out.print(((String)request.getAttribute("msg")).toString());
+out.print((String)request.getAttribute("siteMsg"));
 %>
 </h1>
 <hr/>
@@ -18,10 +18,6 @@ out.print(((String)request.getAttribute("msg")).toString());
 <form name = "response" action = "EnterServlet" method = "post">
 <input type = "hidden" name = "pagename" value = "response"/>
 <table cellpadding = "5" cellspacing = "5">
-<%	
-	String hiddenStr = ((String)request.getAttribute("msg")).toString();
-%>
-<input type = "hidden" name = "oldmsg" value = "<%=hiddenStr%>"/>
 <tr>
 	<td><button type = "submit" name = "button" value = "buttonReplace">Replace</button></td>
 	<td><input type = "text" name = "txtReplace"/></td>
@@ -37,12 +33,19 @@ out.print(((String)request.getAttribute("msg")).toString());
 
 <p>
 <%
-out.println("Session Expiration Time: " + ((String)request.getAttribute("sessExpiration")).toString());
-%>
-</p>
-<p> 
-<%
-out.println(((String)request.getAttribute("cookieInfo")).toString());
+out.println("Server executing the client request: " 
+		+ (String)request.getAttribute("siteSvrIDRequest") + "<br>");
+out.println("Session data is found in: " + (String)request.getAttribute("siteSvrIDFound") 
+		+ " , this is " + (String)request.getAttribute("siteSvrIDFoundPB") + "<br><br>");
+
+out.println("Session Information" + "<br>");
+out.println("SvrID_primary: " + (String)request.getAttribute("siteSvrIDPrimary") + "<br>");
+out.println("SvrID_backup: " + (String)request.getAttribute("siteSvrIDBackup") + "<br>");
+out.println("Expiration Time: " + (String)request.getAttribute("siteExpirationTime") + "<br>");
+out.println("Discard Time: " + (String)request.getAttribute("siteDiscardTime") + "<br><br>");
+
+out.println("View Information" + "<br>");
+out.println((String)request.getAttribute("siteView"));
 %>
 </p>
 
